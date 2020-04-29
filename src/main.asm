@@ -5,7 +5,7 @@ arch n64.cpu
 endian msb
 
 // ROM file
-output "../build/helloworld.n64", create
+output "../build/cubeworld.n64", create
 
 // ROM size
 fill 1052672
