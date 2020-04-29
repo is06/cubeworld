@@ -35,7 +35,6 @@ constant r29(29)
 constant r30(30)
 constant r31(31)
 
-constant zero(0)
 constant at(1)
 constant v0(2)
 constant v1(3)
@@ -67,12 +66,6 @@ constant gp(28)
 constant sp(29)
 constant s8(30)
 constant ra(31)
-
-constant Count(9)
-constant Compare(11)
-constant Status(12)
-constant Cause(13)
-constant ErrorEPC(30)
 
 // N64 MIPS 4300 CP1 Floating Point Unit (FPU) Registers (COP1)
 constant f0(0)
@@ -232,7 +225,6 @@ constant PIF_RAM($7C0)   // $1FC007C0..$1FC007FF PIF: RAM (JoyChannel)
 constant PIF_HWORD($7C4) // $1FC007C4..$1FC007C5 PIF: HWORD
 constant PIF_XBYTE($7C6) // $1FC007C6 PIF: Analog X Byte
 constant PIF_YBYTE($7C7) // $1FC007C7 PIF: Analog Y Byte
-constant PIF_CTRL($07FC)
 
 constant CART_DOM1_ADDR3($BFD0) // $1FD00000..$7FFFFFFF Cartridge Domain 1 (Address 3)
 
@@ -242,74 +234,18 @@ constant VI_NTSC_CLOCK(48681812) // NTSC: Hz = 48.681812 MHz
 constant VI_PAL_CLOCK(49656530)  // PAL:  Hz = 49.656530 MHz
 constant VI_MPAL_CLOCK(48628316) // MPAL: Hz = 48.628316 MHz
 
-macro ALIGN(size) { // Align Byte Amount
+macro align(size) { // Align Byte Amount
   while (pc() % {size}) {
     db 0
   }
 }
 
-macro FORCE_PC(size) {
-	if (pc() > {size}) {
-		error "Program Counter is greater than specified size"
-	}
-	while (pc() < {size}) {
-		db 0
-	}
-}
-
-define value(DEBUG_SHOW_STATIC_VALUE);
-
-macro FIXED_GAP(base, gap) {
-	if (pc() > {base} + {gap}) {		
-		error "Gap is greater than specified size "
-	}
-	while (pc() < {base} + {gap}) {
-		if {defined DEBUG_SHOW_STATIC_VALUE} {
-			db 0xA5
-		} else {
-			db 0x0
-		}
-	}	
-}
-
-macro init() { // Initialise N64 (Stop N64 From Crashing 5 Seconds After Boot)
+macro N64_INIT() { // Initialise N64 (Stop N64 From Crashing 5 Seconds After Boot)
   lui a0,PIF_BASE // A0 = PIF Base Register ($BFC00000)
-  ori t0,zero, 8
+  ori t0,r0,8
   sw t0,PIF_RAM+$3C(a0)
-  // Stack location is max location of DMEM working towards zero  
-  // li sp, 0xA400'0FFF & -4
-  // Alternate Stack Location if DMEM is completely used
-  // Put it at the very top of RAM and let it work down.
-	la t0, 0x80000318
-	lw t0, 0(t0)	 // 0x40'0000 or 0x80'0000	
-	lui t1, 0x8000
-	or t0, t0, t1
-	addi sp, t0, -4
 }
 
-macro DMARAM2Cart(start, end, dest) { // DMA Data Copy Cart->DRAM: Start Cart Address, End Cart Address, Destination DRAM Address
-  lui a0,PI_BASE // A0 = PI Base Register ($A4600000)
-  -
-    lw t0,PI_STATUS(a0) // T0 = Word From PI Status Register ($A4600010)
-    andi t0,3 // AND PI Status With 3
-    bnez t0,- // IF TRUE DMA Is Busy
-    nop // Delay Slot
-
-  la t0,{dest}&$7FFFFF // T0 = Aligned DRAM Physical RAM Offset ($00000000..$007FFFFF 8MB)
-  sw t0,PI_DRAM_ADDR(a0) // Store RAM Offset To PI DRAM Address Register ($A4600000)
-  la t0,$10000000|({start}&$3FFFFFF) // T0 = Aligned Cart Physical ROM Offset ($10000000..$13FFFFFF 64MB)
-  sw t0,PI_CART_ADDR(a0) // Store ROM Offset To PI Cart Address Register ($A4600004)
-  la t0,({end}-{start})-1 // T0 = Length Of DMA Transfer In Bytes - 1
-  sw t0,PI_RD_LEN_LEN(a0) // Store DMA Length To PI Write Length Register ($A460000C)
-}
-macro DMAWait() {
-  lui a0,PI_BASE // A0 = PI Base Register ($A4600000)
-  -
-    lw t0,PI_STATUS(a0) // T0 = Word From PI Status Register ($A4600010)
-    andi t0,3 // AND PI Status With 3
-    bnez t0,- // IF TRUE DMA Is Busy
-    nop // Delay Slot
-}
 macro DMA(start, end, dest) { // DMA Data Copy Cart->DRAM: Start Cart Address, End Cart Address, Destination DRAM Address
   lui a0,PI_BASE // A0 = PI Base Register ($A4600000)
   -
@@ -324,49 +260,4 @@ macro DMA(start, end, dest) { // DMA Data Copy Cart->DRAM: Start Cart Address, E
   sw t0,PI_CART_ADDR(a0) // Store ROM Offset To PI Cart Address Register ($A4600004)
   la t0,({end}-{start})-1 // T0 = Length Of DMA Transfer In Bytes - 1
   sw t0,PI_WR_LEN(a0) // Store DMA Length To PI Write Length Register ($A460000C)
-}
-macro STACK_PUSH(register) {
-	addiu sp, sp, -4
-	sw {register}, 0(sp)
-}
-
-macro STACK_POP(register) {
-	lw {register}, 0(sp)
-	addiu sp, sp, 4
-}
-
-macro STACK_ENTRY() {
-	addiu sp, sp, -56
-	sw ra, 0(sp)
-	sw a0, 4(sp)
-	sw a1, 8(sp)
-	sw a2, 12(sp)
-	sw a3, 16(sp)
-	sw s0, 20(sp)
-	sw s1, 24(sp)
-	sw s2, 28(sp)
-	sw s3, 32(sp)
-	sw s4, 36(sp)
-	sw s5, 40(sp)
-	sw s6, 44(sp)
-	sw s7, 48(sp)
-	sw s8, 52(sp)
-}
-
-macro STACK_RETURN() {
-	lw ra, 0(sp)
-	lw a0, 4(sp)
-	lw a1, 8(sp)
-	lw a2, 12(sp)
-	lw a3, 16(sp)
-	lw s0, 20(sp)
-	lw s1, 24(sp)
-	lw s2, 28(sp)
-	lw s3, 32(sp)
-	lw s4, 36(sp)
-	lw s5, 40(sp)
-	lw s6, 44(sp)
-	lw s7, 48(sp)
-	lw s8, 52(sp)
-	addiu sp, sp, 56
 }
