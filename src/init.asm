@@ -1,0 +1,5 @@
+Main_Init:
+
+    init()
+    ScreenNTSC(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, BPP16, FRAME_BUFFER_ADDRESS)
+    WaitScanline($200)
