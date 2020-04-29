@@ -1,5 +1,5 @@
 Main_Init:
 
-    init()
+    N64_INIT()
     ScreenNTSC(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, BPP16, FRAME_BUFFER_ADDRESS)
     WaitScanline($200)
