@@ -1,6 +1,3 @@
-//=============
-// N64 Include
-//=============
 // N64 MIPS 4300 CPU Registers
 constant r0(0)
 constant r1(1)
@@ -234,30 +231,36 @@ constant VI_NTSC_CLOCK(48681812) // NTSC: Hz = 48.681812 MHz
 constant VI_PAL_CLOCK(49656530)  // PAL:  Hz = 49.656530 MHz
 constant VI_MPAL_CLOCK(48628316) // MPAL: Hz = 48.628316 MHz
 
-macro align(size) { // Align Byte Amount
-  while (pc() % {size}) {
-    db 0
-  }
+// Align Byte Amount
+macro System_ByteAlign(size) {
+    while (pc() % {size}) {
+        db 0
+    }
 }
 
-macro N64_INIT() { // Initialise N64 (Stop N64 From Crashing 5 Seconds After Boot)
-  lui a0,PIF_BASE // A0 = PIF Base Register ($BFC00000)
-  ori t0,r0,8
-  sw t0,PIF_RAM+$3C(a0)
+// Initialize N64 (Stop N64 From Crashing 5 Seconds After Boot)
+macro System_Init() {
+    lui a0, PIF_BASE // A0 = PIF Base Register ($BFC00000)
+    ori t0, r0, 8
+    sw t0, PIF_RAM+$3C(a0)
 }
 
-macro DMA(start, end, dest) { // DMA Data Copy Cart->DRAM: Start Cart Address, End Cart Address, Destination DRAM Address
-  lui a0,PI_BASE // A0 = PI Base Register ($A4600000)
-  -
-    lw t0,PI_STATUS(a0) // T0 = Word From PI Status Register ($A4600010)
-    andi t0,3 // AND PI Status With 3
-    bnez t0,- // IF TRUE DMA Is Busy
-    nop // Delay Slot
+// DMA Data Copy Cart->DRAM
+// @param start: Start Cart Address
+// @param end: End Cart Address
+// @param dest: Destination DRAM Address
+macro System_DMACopy(start, end, dest) {
+    lui a0, PI_BASE // A0 = PI Base Register ($A4600000)
+    -
+        lw t0, PI_STATUS(a0) // T0 = Word From PI Status Register ($A4600010)
+        andi t0, 3 // AND PI Status With 3
+        bnez t0, - // IF TRUE DMA Is Busy
+        nop // Delay Slot
 
-  la t0,{dest}&$7FFFFF // T0 = Aligned DRAM Physical RAM Offset ($00000000..$007FFFFF 8MB)
-  sw t0,PI_DRAM_ADDR(a0) // Store RAM Offset To PI DRAM Address Register ($A4600000)
-  la t0,$10000000|({start}&$3FFFFFF) // T0 = Aligned Cart Physical ROM Offset ($10000000..$13FFFFFF 64MB)
-  sw t0,PI_CART_ADDR(a0) // Store ROM Offset To PI Cart Address Register ($A4600004)
-  la t0,({end}-{start})-1 // T0 = Length Of DMA Transfer In Bytes - 1
-  sw t0,PI_WR_LEN(a0) // Store DMA Length To PI Write Length Register ($A460000C)
+    la t0, {dest} & $7FFFFF // T0 = Aligned DRAM Physical RAM Offset ($00000000..$007FFFFF 8MB)
+    sw t0, PI_DRAM_ADDR(a0) // Store RAM Offset To PI DRAM Address Register ($A4600000)
+    la t0, $10000000 | ({start} & $3FFFFFF) // T0 = Aligned Cart Physical ROM Offset ($10000000..$13FFFFFF 64MB)
+    sw t0, PI_CART_ADDR(a0) // Store ROM Offset To PI Cart Address Register ($A4600004)
+    la t0, ({end} - {start}) - 1 // T0 = Length Of DMA Transfer In Bytes - 1
+    sw t0, PI_WR_LEN(a0) // Store DMA Length To PI Write Length Register ($A460000C)
 }
