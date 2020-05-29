@@ -1,6 +1,7 @@
 //==============
 // N64 Graphics
 //==============
+
 constant BPP0($0000)  // VI Status/Control: Color Depth Blank (No Data Or Sync) (Bit 0..1)
 //*RESERVED*($0001)   // VI Status/Control: Color Depth Reserved (Bit 0..1)
 constant BPP16($0002) // VI Status/Control: Color Depth 16BPP R5/G5/B5/A1 (Bit 0..1)
@@ -35,270 +36,83 @@ constant PIXEL_ADV_E($0E000) // VI Status/Control: Pixel Advance E (Bit 12..15)
 constant PIXEL_ADV_F($0F000) // VI Status/Control: Pixel Advance F (Bit 12..15)
 constant DITHER_FILTER_EN($10000) // VI Status/Control: Dither Filter Enable (Used With 16BPP Display) (Bit 16)
 
-macro ScreenNTSC(width,height, status, origin) {
-  lui a0,VI_BASE // A0 = VI Base Register ($A4400000)
-  li t0,{status}      // T0 = Status/Control
-  sw t0,VI_STATUS(a0) // Store Status/Control To VI Status Register ($A4400000)
-  la t0,{origin}      // T0 = Origin (Frame Buffer Origin In Bytes)
-  sw t0,VI_ORIGIN(a0) // Store Origin To VI Origin Register ($A4400004)
-  ori t0,r0,{width}   // T0 = Width (Frame Buffer Line Width In Pixels)
-  sw t0,VI_WIDTH(a0)  // Store Width To VI Width Register ($A4400008)
-  ori t0,r0,$200      // T0 = Vertical Interrupt (Interrupt When Current Half-Line $200)
-  sw t0,VI_V_INTR(a0) // Store Vertical Interrupt To VI Interrupt Register ($A440000C)
-  ori t0,r0,0         // T0 = Current Vertical Line (Current Half-Line, Sampled Once Per Line = 0)
-  sw t0,VI_V_CURRENT_LINE(a0) // Store Current Vertical Line To VI Current Register ($A4400010)
-  li t0,$3E52239      // T0 = Video Timing (Start Of Color Burst In Pixels from H-Sync = 3, Vertical Sync Width In Half Lines = 229, Color Burst Width In Pixels = 34, Horizontal Sync Width In Pixels = 57)
-  sw t0,VI_TIMING(a0) // Store Video Timing To VI Burst Register ($A4400014)
-  ori t0,r0,$20D      // T0 = Vertical Sync (Number Of Half-Lines Per Field = 525)
-  sw t0,VI_V_SYNC(a0) // Store Vertical Sync To VI V Sync Register ($A4400018)
-  ori t0,r0,$C15      // T0 = Horizontal Sync (5-bit Leap Pattern Used For PAL only = 0, Total Duration Of A Line In 1/4 Pixel = 3093)
-  sw t0,VI_H_SYNC(a0) // Store Horizontal Sync To VI H Sync Register ($A440001C)
-  li t0,$C150C15           // T0 = Horizontal Sync Leap (Identical To H Sync = 3093, Identical To H Sync = 3093)
-  sw t0,VI_H_SYNC_LEAP(a0) // Store Horizontal Sync Leap To VI Leap Register ($A4400020)
-  li t0,$6C02EC        // T0 = Horizontal Video (Start Of Active Video In Screen Pixels = 108, End Of Active Video In Screen Pixels = 748)
-  sw t0,VI_H_VIDEO(a0) // Store Horizontal Video To VI H Start Register ($A4400024)
-  li t0,$2501FF        // T0 = Vertical Video (Start Of Active Video In Screen Half-Lines = 37, End Of Active Video In Screen Half-Lines = 511)
-  sw t0,VI_V_VIDEO(a0) // Store Vertical Video To VI V Start Register ($A4400028)
-  li t0,$E0204         // T0 = Vertical Burst (Start Of Color Burst Enable In Half-Lines = 14, End Of Color Burst Enable In Half-Lines = 516)
-  sw t0,VI_V_BURST(a0) // Store Vertical Burst To VI V Burst Register ($A440002C)
-  ori t0,r0,(($100*{width})/160) // T0 = X-Scale (Horizontal Subpixel Offset In 2.10 Format = 0, 1/Horizontal Scale Up Factor In 2.10 Format)
-  sw t0,VI_X_SCALE(a0)           // Store X-Scale To VI X Scale Register ($A4400030)
-  ori t0,r0,(($100*{height})/60) // T0 = Y-Scale (Vertical Subpixel Offset In 2.10 Format = 0, 1/Vertical Scale Up Factor In 2.10 Format)
-  sw t0,VI_Y_SCALE(a0)           // Store Y-Scale To VI Y Scale Register ($A4400034)
+macro Video_SetNTSC(width,height, status, origin) {
+    lui a0,VI_BASE // A0 = VI Base Register ($A4400000)
+    li t0,{status}      // T0 = Status/Control
+    sw t0,VI_STATUS(a0) // Store Status/Control To VI Status Register ($A4400000)
+    la t0,{origin}      // T0 = Origin (Frame Buffer Origin In Bytes)
+    sw t0,VI_ORIGIN(a0) // Store Origin To VI Origin Register ($A4400004)
+    ori t0,r0,{width}   // T0 = Width (Frame Buffer Line Width In Pixels)
+    sw t0,VI_WIDTH(a0)  // Store Width To VI Width Register ($A4400008)
+    ori t0,r0,$200      // T0 = Vertical Interrupt (Interrupt When Current Half-Line $200)
+    sw t0,VI_V_INTR(a0) // Store Vertical Interrupt To VI Interrupt Register ($A440000C)
+    ori t0,r0,0         // T0 = Current Vertical Line (Current Half-Line, Sampled Once Per Line = 0)
+    sw t0,VI_V_CURRENT_LINE(a0) // Store Current Vertical Line To VI Current Register ($A4400010)
+    li t0,$3E52239      // T0 = Video Timing (Start Of Color Burst In Pixels from H-Sync = 3, Vertical Sync Width In Half Lines = 229, Color Burst Width In Pixels = 34, Horizontal Sync Width In Pixels = 57)
+    sw t0,VI_TIMING(a0) // Store Video Timing To VI Burst Register ($A4400014)
+    ori t0,r0,$20D      // T0 = Vertical Sync (Number Of Half-Lines Per Field = 525)
+    sw t0,VI_V_SYNC(a0) // Store Vertical Sync To VI V Sync Register ($A4400018)
+    ori t0,r0,$C15      // T0 = Horizontal Sync (5-bit Leap Pattern Used For PAL only = 0, Total Duration Of A Line In 1/4 Pixel = 3093)
+    sw t0,VI_H_SYNC(a0) // Store Horizontal Sync To VI H Sync Register ($A440001C)
+    li t0,$C150C15           // T0 = Horizontal Sync Leap (Identical To H Sync = 3093, Identical To H Sync = 3093)
+    sw t0,VI_H_SYNC_LEAP(a0) // Store Horizontal Sync Leap To VI Leap Register ($A4400020)
+    li t0,$6C02EC        // T0 = Horizontal Video (Start Of Active Video In Screen Pixels = 108, End Of Active Video In Screen Pixels = 748)
+    sw t0,VI_H_VIDEO(a0) // Store Horizontal Video To VI H Start Register ($A4400024)
+    li t0,$2501FF        // T0 = Vertical Video (Start Of Active Video In Screen Half-Lines = 37, End Of Active Video In Screen Half-Lines = 511)
+    sw t0,VI_V_VIDEO(a0) // Store Vertical Video To VI V Start Register ($A4400028)
+    li t0,$E0204         // T0 = Vertical Burst (Start Of Color Burst Enable In Half-Lines = 14, End Of Color Burst Enable In Half-Lines = 516)
+    sw t0,VI_V_BURST(a0) // Store Vertical Burst To VI V Burst Register ($A440002C)
+    ori t0,r0,(($100*{width})/160) // T0 = X-Scale (Horizontal Subpixel Offset In 2.10 Format = 0, 1/Horizontal Scale Up Factor In 2.10 Format)
+    sw t0,VI_X_SCALE(a0)           // Store X-Scale To VI X Scale Register ($A4400030)
+    ori t0,r0,(($100*{height})/60) // T0 = Y-Scale (Vertical Subpixel Offset In 2.10 Format = 0, 1/Vertical Scale Up Factor In 2.10 Format)
+    sw t0,VI_Y_SCALE(a0)           // Store Y-Scale To VI Y Scale Register ($A4400034)
 }
 
-macro ScreenPAL(width,height, status, origin) {
-  lui a0,VI_BASE // A0 = VI Base Register ($A4400000)
-  li t0,{status}      // T0 = Status/Control
-  sw t0,VI_STATUS(a0) // Store Status/Control To VI Status Register ($A4400000)
-  la t0,{origin}      // T0 = Origin (Frame Buffer Origin In Bytes)
-  sw t0,VI_ORIGIN(a0) // Store Origin To VI Origin Register ($A4400004)
-  ori t0,r0,{width}   // T0 = Width (Frame Buffer Line Width In Pixels)
-  sw t0,VI_WIDTH(a0)  // Store Width To VI Width Register ($A4400008)
-  ori t0,r0,$200      // T0 = Vertical Interrupt (Interrupt When Current Half-Line $200)
-  sw t0,VI_V_INTR(a0) // Store Vertical Interrupt To VI Interrupt Register ($A440000C)
-  ori t0,r0,0         // T0 = Current Vertical Line (Current Half-Line, Sampled Once Per Line = 0)
-  sw t0,VI_V_CURRENT_LINE(a0) // Store Current Vertical Line To VI Current Register ($A4400010)
-  li t0,$404233A      // T0 = Video Timing (Start Of Color Burst In Pixels from H-Sync = 4, Vertical Sync Width In Half Lines = 04, Color Burst Width In Pixels = 35, Horizontal Sync Width In Pixels = 58)
-  sw t0,VI_TIMING(a0) // Store Video Timing To VI Burst Register ($A4400014)
-  ori t0,r0,$271      // T0 = Vertical Sync (Number Of Half-Lines Per Field = 625)
-  sw t0,VI_V_SYNC(a0) // Store Vertical Sync To VI V Sync Register ($A4400018)
-  li t0,$150C69       // T0 = Horizontal Sync (5-bit Leap Pattern Used For PAL only = 21: %10101, Total Duration Of A Line In 1/4 Pixel = 3177)
-  sw t0,VI_H_SYNC(a0) // Store Horizontal Sync To VI H Sync Register ($A440001C)
-  li t0,$C6F0C6E           // T0 = Horizontal Sync Leap (Identical To H Sync = 3183, Identical To H Sync = 3182)
-  sw t0,VI_H_SYNC_LEAP(a0) // Store Horizontal Sync Leap To VI Leap Register ($A4400020)
-  li t0,$800300        // T0 = Horizontal Video (Start Of Active Video In Screen Pixels = 128, End Of Active Video In Screen Pixels = 768)
-  sw t0,VI_H_VIDEO(a0) // Store Horizontal Video To VI H Start Register ($A4400024)
-  li t0,$5F0239        // T0 = Vertical Video (Start Of Active Video In Screen Half-Lines = 95, End Of Active Video In Screen Half-Lines = 569)
-  sw t0,VI_V_VIDEO(a0) // Store Vertical Video To VI V Start Register ($A4400028)
-  li t0,$9026B         // T0 = Vertical Burst (Start Of Color Burst Enable In Half-Lines = 9, End Of Color Burst Enable In Half-Lines = 619)
-  sw t0,VI_V_BURST(a0) // Store Vertical Burst To VI V Burst Register ($A440002C)
-  ori t0,r0,(($100*{width})/160) // T0 = X-Scale (Horizontal Subpixel Offset In 2.10 Format = 0, 1/Horizontal Scale Up Factor In 2.10 Format)
-  sw t0,VI_X_SCALE(a0)           // Store X-Scale To VI X Scale Register ($A4400030)
-  ori t0,r0,(($100*{height})/60) // T0 = Y-Scale (Vertical Subpixel Offset In 2.10 Format = 0, 1/Vertical Scale Up Factor In 2.10 Format)
-  sw t0,VI_Y_SCALE(a0)           // Store Y-Scale To VI Y Scale Register ($A4400034)
+macro Video_SetPAL(width,height, status, origin) {
+    lui a0,VI_BASE // A0 = VI Base Register ($A4400000)
+    li t0,{status}      // T0 = Status/Control
+    sw t0,VI_STATUS(a0) // Store Status/Control To VI Status Register ($A4400000)
+    la t0,{origin}      // T0 = Origin (Frame Buffer Origin In Bytes)
+    sw t0,VI_ORIGIN(a0) // Store Origin To VI Origin Register ($A4400004)
+    ori t0,r0,{width}   // T0 = Width (Frame Buffer Line Width In Pixels)
+    sw t0,VI_WIDTH(a0)  // Store Width To VI Width Register ($A4400008)
+    ori t0,r0,$200      // T0 = Vertical Interrupt (Interrupt When Current Half-Line $200)
+    sw t0,VI_V_INTR(a0) // Store Vertical Interrupt To VI Interrupt Register ($A440000C)
+    ori t0,r0,0         // T0 = Current Vertical Line (Current Half-Line, Sampled Once Per Line = 0)
+    sw t0,VI_V_CURRENT_LINE(a0) // Store Current Vertical Line To VI Current Register ($A4400010)
+    li t0,$404233A      // T0 = Video Timing (Start Of Color Burst In Pixels from H-Sync = 4, Vertical Sync Width In Half Lines = 04, Color Burst Width In Pixels = 35, Horizontal Sync Width In Pixels = 58)
+    sw t0,VI_TIMING(a0) // Store Video Timing To VI Burst Register ($A4400014)
+    ori t0,r0,$271      // T0 = Vertical Sync (Number Of Half-Lines Per Field = 625)
+    sw t0,VI_V_SYNC(a0) // Store Vertical Sync To VI V Sync Register ($A4400018)
+    li t0,$150C69       // T0 = Horizontal Sync (5-bit Leap Pattern Used For PAL only = 21: %10101, Total Duration Of A Line In 1/4 Pixel = 3177)
+    sw t0,VI_H_SYNC(a0) // Store Horizontal Sync To VI H Sync Register ($A440001C)
+    li t0,$C6F0C6E           // T0 = Horizontal Sync Leap (Identical To H Sync = 3183, Identical To H Sync = 3182)
+    sw t0,VI_H_SYNC_LEAP(a0) // Store Horizontal Sync Leap To VI Leap Register ($A4400020)
+    li t0,$800300        // T0 = Horizontal Video (Start Of Active Video In Screen Pixels = 128, End Of Active Video In Screen Pixels = 768)
+    sw t0,VI_H_VIDEO(a0) // Store Horizontal Video To VI H Start Register ($A4400024)
+    li t0,$5F0239        // T0 = Vertical Video (Start Of Active Video In Screen Half-Lines = 95, End Of Active Video In Screen Half-Lines = 569)
+    sw t0,VI_V_VIDEO(a0) // Store Vertical Video To VI V Start Register ($A4400028)
+    li t0,$9026B         // T0 = Vertical Burst (Start Of Color Burst Enable In Half-Lines = 9, End Of Color Burst Enable In Half-Lines = 619)
+    sw t0,VI_V_BURST(a0) // Store Vertical Burst To VI V Burst Register ($A440002C)
+    ori t0,r0,(($100*{width})/160) // T0 = X-Scale (Horizontal Subpixel Offset In 2.10 Format = 0, 1/Horizontal Scale Up Factor In 2.10 Format)
+    sw t0,VI_X_SCALE(a0)           // Store X-Scale To VI X Scale Register ($A4400030)
+    ori t0,r0,(($100*{height})/60) // T0 = Y-Scale (Vertical Subpixel Offset In 2.10 Format = 0, 1/Vertical Scale Up Factor In 2.10 Format)
+    sw t0,VI_Y_SCALE(a0)           // Store Y-Scale To VI Y Scale Register ($A4400034)
 }
 
-macro WaitScanline(scanline) { // Wait For RDP To Reach Scanline
-  lui a0,VI_BASE // A0 = VI Base Register ($A4400000)
-  ori t0,r0,{scanline} // T0 = Scan Line
-  -
-    lw t1,VI_V_CURRENT_LINE(a0) // T1 = Current Scan Line
-    bne t1,t0,- // IF (Current Scan Line != Scan Line) Wait
-    nop // ELSE Continue (Delay Slot)
+macro Video_WaitForScanline(scanline) { // Wait For RDP To Reach Scanline
+    lui a0,VI_BASE // A0 = VI Base Register ($A4400000)
+    ori t0,r0,{scanline} // T0 = Scan Line
+    -
+        lw t1,VI_V_CURRENT_LINE(a0) // T1 = Current Scan Line
+        bne t1,t0,- // IF (Current Scan Line != Scan Line) Wait
+        nop // ELSE Continue (Delay Slot)
 }
 
-// RDP Commands
-macro DPC(start,end) { // Run DPC Command Buffer: Start Address, End Address
-  lui a0,DPC_BASE // A0 = Reality Display Processer Control Interface Base Register ($A4100000)
-  la a1,{start} // A1 = DPC Command Start Address
-  sw a1,DPC_START(a0) // Store DPC Command Start Address To DP Start Register ($A4100000)
-  la a1,{end} // A1 = DPC Command End Address
-  sw a1,DPC_END(a0) // Store DPC Command End Address To DP End Register ($A4100004)
-}
-
-// No_Op: No Effect On RDP Command Execution, Useful For Padding Command Buffers
-
-// Fill_Triangle: lft,level,tile,yl,ym,yh, xl,xlf,dxldy,dxldyf, xh,xhf,dxhdy,dxhdyf, xm,xmf,dxmdy,dxmdyf
-// Word 0: Left Major Flag (0=Left Major, 1=Right Major), Number Of Mip-Maps Minus One, Tile ID, Y Coordinate Of Low, Mid Minor, Major Edge (Fixed Point S.11.2)
-// Word 1: X Coordinate Of Low    Edge Integer, Fraction, DxLDy Inverse Slope Of Low    Edge Integer, Fraction
-// Word 2: X Coordinate Of Major  Edge Integer, Fraction, DxHDy Inverse Slope Of Major  Edge Integer, Fraction
-// Word 3: X Coordinate Of Middle Edge Integer, Fraction, DxMDy Inverse Slope Of Middle Edge Integer, Fraction
-
-// Fill_ZBuffer_Triangle: lft,level,tile,yl,ym,yh, xl,xlf,dxldy,dxldyf, xh,xhf,dxhdy,dxhdyf, xm,xmf,dxmdy,dxmdyf
-// Word 0: Left Major Flag (0=Left Major, 1=Right Major), Number Of Mip-Maps Minus One, Tile ID, Y Coordinate Of Low, Mid Minor, Major Edge (Fixed Point S.11.2)
-// Word 1: X Coordinate Of Low    Edge Integer, Fraction, DxLDy Inverse Slope Of Low    Edge Integer, Fraction
-// Word 2: X Coordinate Of Major  Edge Integer, Fraction, DxHDy Inverse Slope Of Major  Edge Integer, Fraction
-// Word 3: X Coordinate Of Middle Edge Integer, Fraction, DxMDy Inverse Slope Of Middle Edge Integer, Fraction
-// Word 4: Z Inverse Depth Integer, Fraction, DzDx Change In Z Per Change In X Coordinate Integer, Fraction (ZBuffer Coefficients)
-// Word 5: DzDe Change In Z Along Major Edge Integer, Fraction, DzDy Change In Z Per Change In Y Coordinate Integer, Fraction
-
-// Texture_Triangle: lft,level,tile,yl,ym,yh, xl,xlf,dxldy,dxldyf, xh,xhf,dxhdy,dxhdyf, xm,xmf,dxmdy,dxmdyf
-// Word 0: Left Major Flag (0=Left Major, 1=Right Major), Number Of Mip-Maps Minus One, Tile ID, Y Coordinate Of Low, Mid Minor, Major Edge (Fixed Point S.11.2)
-// Word 1: X Coordinate Of Low    Edge Integer, Fraction, DxLDy Inverse Slope Of Low    Edge Integer, Fraction
-// Word 2: X Coordinate Of Major  Edge Integer, Fraction, DxHDy Inverse Slope Of Major  Edge Integer, Fraction
-// Word 3: X Coordinate Of Middle Edge Integer, Fraction, DxMDy Inverse Slope Of Middle Edge Integer, Fraction
-// Word 4:  S Texture Coordinate Integer, T Texture Coordinate Integer, W Normalized Inverse Depth Integer (Texture Coefficients)
-// Word 5:  DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Integer
-// Word 6:  S Texture Coordinate Fraction, T Texture Coordinate Fraction, W Normalized Inverse Depth Fraction
-// Word 7:  DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Fraction
-// Word 8:  DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Integer
-// Word 9:  DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Integer
-// Word 10: DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Fraction
-// Word 11: DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Fraction
-
-// Texture_ZBuffer_Triangle: lft,level,tile,yl,ym,yh, xl,xlf,dxldy,dxldyf, xh,xhf,dxhdy,dxhdyf, xm,xmf,dxmdy,dxmdyf
-// Word 0: Left Major Flag (0=Left Major, 1=Right Major), Number Of Mip-Maps Minus One, Tile ID, Y Coordinate Of Low, Mid Minor, Major Edge (Fixed Point S.11.2)
-// Word 1: X Coordinate Of Low    Edge Integer, Fraction, DxLDy Inverse Slope Of Low    Edge Integer, Fraction
-// Word 2: X Coordinate Of Major  Edge Integer, Fraction, DxHDy Inverse Slope Of Major  Edge Integer, Fraction
-// Word 3: X Coordinate Of Middle Edge Integer, Fraction, DxMDy Inverse Slope Of Middle Edge Integer, Fraction
-// Word 4:  S Texture Coordinate Integer, T Texture Coordinate Integer, W Normalized Inverse Depth Integer (Texture Coefficients)
-// Word 5:  DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Integer
-// Word 6:  S Texture Coordinate Fraction, T Texture Coordinate Fraction, W Normalized Inverse Depth Fraction
-// Word 7:  DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Fraction
-// Word 8:  DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Integer
-// Word 9:  DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Integer
-// Word 10: DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Fraction
-// Word 11: DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Fraction
-// Word 12: Z Inverse Depth Integer, Fraction, DzDx Change In Z Per Change In X Coordinate Integer, Fraction (ZBuffer Coefficients)
-// Word 13: DzDe Change In Z Along Major Edge Integer, Fraction, DzDy Change In Z Per Change In Y Coordinate Integer, Fraction
-
-// Shade_Triangle: lft,level,tile,yl,ym,yh, xl,xlf,dxldy,dxldyf, xh,xhf,dxhdy,dxhdyf, xm,xmf,dxmdy,dxmdyf
-// Word 0: Left Major Flag (0=Left Major, 1=Right Major), Number Of Mip-Maps Minus One, Tile ID, Y Coordinate Of Low, Mid Minor, Major Edge (Fixed Point S.11.2)
-// Word 1: X Coordinate Of Low    Edge Integer, Fraction, DxLDy Inverse Slope Of Low    Edge Integer, Fraction
-// Word 2: X Coordinate Of Major  Edge Integer, Fraction, DxHDy Inverse Slope Of Major  Edge Integer, Fraction
-// Word 3: X Coordinate Of Middle Edge Integer, Fraction, DxMDy Inverse Slope Of Middle Edge Integer, Fraction
-// Word 4:  Red Color Component Integer, Green Color Component Integer, Blue Color Component Integer, Alpha Color Component Integer (Shade Coefficients)
-// Word 5:  DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Integer
-// Word 6:  Red Color Component Fraction, Green Color Component Fraction, Blue Color Component Fraction, Alpha Color Component Fraction
-// Word 7:  DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Fraction
-// Word 8:  DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Integer
-// Word 9:  DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Integer
-// Word 10: DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Fraction
-// Word 11: DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Fraction
-
-// Shade_ZBuffer_Triangle: lft,level,tile,yl,ym,yh, xl,xlf,dxldy,dxldyf, xh,xhf,dxhdy,dxhdyf, xm,xmf,dxmdy,dxmdyf
-// Word 0: Left Major Flag (0=Left Major, 1=Right Major), Number Of Mip-Maps Minus One, Tile ID, Y Coordinate Of Low, Mid Minor, Major Edge (Fixed Point S.11.2)
-// Word 1: X Coordinate Of Low    Edge Integer, Fraction, DxLDy Inverse Slope Of Low    Edge Integer, Fraction
-// Word 2: X Coordinate Of Major  Edge Integer, Fraction, DxHDy Inverse Slope Of Major  Edge Integer, Fraction
-// Word 3: X Coordinate Of Middle Edge Integer, Fraction, DxMDy Inverse Slope Of Middle Edge Integer, Fraction
-// Word 4:  Red Color Component Integer, Green Color Component Integer, Blue Color Component Integer, Alpha Color Component Integer (Shade Coefficients)
-// Word 5:  DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Integer
-// Word 6:  Red Color Component Fraction, Green Color Component Fraction, Blue Color Component Fraction, Alpha Color Component Fraction
-// Word 7:  DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Fraction
-// Word 8:  DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Integer
-// Word 9:  DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Integer
-// Word 10: DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Fraction
-// Word 11: DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Fraction
-// Word 12: Z Inverse Depth Integer, Fraction, DzDx Change In Z Per Change In X Coordinate Integer, Fraction (ZBuffer Coefficients)
-// Word 13: DzDe Change In Z Along Major Edge Integer, Fraction, DzDy Change In Z Per Change In Y Coordinate Integer, Fraction
-
-// Shade_Texture_Triangle: lft,level,tile,yl,ym,yh, xl,xlf,dxldy,dxldyf, xh,xhf,dxhdy,dxhdyf, xm,xmf,dxmdy,dxmdyf
-// Word 0: Left Major Flag (0=Left Major, 1=Right Major), Number Of Mip-Maps Minus One, Tile ID, Y Coordinate Of Low, Mid Minor, Major Edge (Fixed Point S.11.2)
-// Word 1: X Coordinate Of Low    Edge Integer, Fraction, DxLDy Inverse Slope Of Low    Edge Integer, Fraction
-// Word 2: X Coordinate Of Major  Edge Integer, Fraction, DxHDy Inverse Slope Of Major  Edge Integer, Fraction
-// Word 3: X Coordinate Of Middle Edge Integer, Fraction, DxMDy Inverse Slope Of Middle Edge Integer, Fraction
-// Word 4:  Red Color Component Integer, Green Color Component Integer, Blue Color Component Integer, Alpha Color Component Integer (Shade Coefficients)
-// Word 5:  DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Integer
-// Word 6:  Red Color Component Fraction, Green Color Component Fraction, Blue Color Component Fraction, Alpha Color Component Fraction
-// Word 7:  DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Fraction
-// Word 8:  DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Integer
-// Word 9:  DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Integer
-// Word 10: DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Fraction
-// Word 11: DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Fraction
-// Word 12: S Texture Coordinate Integer, T Texture Coordinate Integer, W Normalized Inverse Depth Integer (Texture Coefficients)
-// Word 13: DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Integer
-// Word 14: S Texture Coordinate Fraction, T Texture Coordinate Fraction, W Normalized Inverse Depth Fraction
-// Word 15: DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Fraction
-// Word 16: DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Integer
-// Word 17: DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Integer
-// Word 18: DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Fraction
-// Word 19: DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Fraction
-
-// Shade_Texture_Z_Buffer_Triangle: lft,level,tile,yl,ym,yh, xl,xlf,dxldy,dxldyf, xh,xhf,dxhdy,dxhdyf, xm,xmf,dxmdy,dxmdyf
-// Word 0: Left Major Flag (0=Left Major, 1=Right Major), Number Of Mip-Maps Minus One, Tile ID, Y Coordinate Of Low, Mid Minor, Major Edge (Fixed Point S.11.2)
-// Word 1: X Coordinate Of Low    Edge Integer, Fraction, DxLDy Inverse Slope Of Low    Edge Integer, Fraction
-// Word 2: X Coordinate Of Major  Edge Integer, Fraction, DxHDy Inverse Slope Of Major  Edge Integer, Fraction
-// Word 3: X Coordinate Of Middle Edge Integer, Fraction, DxMDy Inverse Slope Of Middle Edge Integer, Fraction
-// Word 4:  Red Color Component Integer, Green Color Component Integer, Blue Color Component Integer, Alpha Color Component Integer (Shade Coefficients)
-// Word 5:  DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Integer
-// Word 6:  Red Color Component Fraction, Green Color Component Fraction, Blue Color Component Fraction, Alpha Color Component Fraction
-// Word 7:  DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Fraction
-// Word 8:  DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Integer
-// Word 9:  DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Integer
-// Word 10: DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Fraction
-// Word 11: DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Fraction
-// Word 12: S Texture Coordinate Integer, T Texture Coordinate Integer, W Normalized Inverse Depth Integer (Texture Coefficients)
-// Word 13: DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Integer
-// Word 14: S Texture Coordinate Fraction, T Texture Coordinate Fraction, W Normalized Inverse Depth Fraction
-// Word 15: DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Fraction
-// Word 16: DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Integer
-// Word 17: DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Integer
-// Word 18: DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Fraction
-// Word 19: DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Fraction
-// Word 20: Z Inverse Depth Integer, Fraction, DzDx Change In Z Per Change In X Coordinate Integer, Fraction (ZBuffer Coefficients)
-// Word 21: DzDe Change In Z Along Major Edge Integer, Fraction, DzDy Change In Z Per Change In Y Coordinate Integer, Fraction
-
-// Shade_Coefficients: r,g,b,a, drdx,dgdx,dbdx,dadx, rf,gf,bf,af, drdxf,dgdxf,dbdxf,dadxf, drde,dgde,dbde,dade, drdy,dgdy,dbdy,dady, drdef,dgdef,dbdef,dadef, drdyf,dgdyf,dbdyf,dadyf
-// Word 0: Red Color Component Integer, Green Color Component Integer, Blue Color Component Integer, Alpha Color Component Integer (Shade Coefficients)
-// Word 1: DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Integer
-// Word 2: Red Color Component Fraction, Green Color Component Fraction, Blue Color Component Fraction, Alpha Color Component Fraction
-// Word 3: DrDx Change In Red, DgDx Change In Green, DbDx Change In Blue, DaDx Change In Alpha Per Change In X Coordinate Fraction
-// Word 4: DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Integer
-// Word 5: DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Integer
-// Word 6: DrDe Change In Red, DgDe Change In Green, DbDe Change In Blue, DaDe Change In Alpha Along The Edge Fraction
-// Word 7: DrDy Change In Red, DgDy Change In Green, DbDy Change In Blue, DaDy Change In Alpha Per Change In Y Coordinate Fraction
-
-// Texture_Coefficients: s,t,w, dsdx,dtdx,dwdx, sf,tf,wf, dsdxf,dtdxf,dwdxf, dsde,dtde,dwde, dsdy,dtdy,dwdy, dsdef,dtdef,dwdef, dsdyf,dtdyf,dwdyf
-// Word 0:  S Texture Coordinate Integer, T Texture Coordinate Integer, W Normalized Inverse Depth Integer
-// Word 1:  DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Integer
-// Word 2:  S Texture Coordinate Fraction, T Texture Coordinate Fraction, W Normalized Inverse Depth Fraction
-// Word 3:  DsDx Change In S, DtDx Change In T, DwDx Change In W Per Change In X Coordinate Fraction
-// Word 4:  DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Integer
-// Word 5:  DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Integer
-// Word 6: DsDe Change In S, DtDe Change In T, DwDe Change In W Along The Edge Fraction
-// Word 7: DsDy Change In S, DtDy Change In T, DwDy Change In W Per Change In Y Coordinate Fraction
-
-// ZBuffer_Coefficients: z,zf,dzdx,dzdxf, dzde,dzdef,dzdy,dzdyf
-// Word 0: Z Inverse Depth Integer, Fraction, DzDx Change In Z Per Change In X Coordinate Integer, Fraction (ZBuffer Coefficients)
-// Word 1: DzDe Change In Z Along Major Edge Integer, Fraction, DzDy Change In Z Per Change In Y Coordinate Integer, Fraction
-
-// Texture_Rectangle: xl,yl, tile, xh,yh, s,t, dsdx,dtdy
-// Word 0: Bottom Right X/Y, Tile ID, Top Left X/Y (Fixed Point 10.2)
-// Word 1: S/T Texture Coordinate Top Left (Fixed Point S.10.5), DsDx Change�In�S�Per�Change�In�X, DtDy Change�In�T�Per�Change�In�Y (Fixed Point S.5.10)
-
-// Texture_Rectangle_Flip: xl,yl, tile, xh,yh, s,t, dsdx,dtdy ; Same As Texture Rectangle Except Hardware Swaps S/T & DsDx/DtDy
-// Word 0: Bottom Right X/Y, Tile ID, Top Left X/Y (Fixed Point 10.2)
-// Word 1: S/T Texture Coordinate Top Left (Fixed Point S.10.5), DsDx Change�In�S�Per�Change�In�X, DtDy Change�In�T�Per�Change�In�Y (Fixed Point S.5.10)
-
-// Sync_Load: Stall Execution Of Load Commands, Until Preceeding Primitives Completely Finish (Usually Preceed Load Commands)
-
-// Sync_Pipe: Stall Pipeline, Until Preceeding Primitives Completely Finish (Software Can Optimize Usage)
-
-// Sync_Tile: Allows Synchronization Between Commands That Write To The Same Tile Descriptor That An Immediately Previous Command Is Reading
-
-// Sync_Full: Stall RDP Until Last DRAM Buffer Is Read Or Written From Any Preceeding Primitive (Needed If Memory Is To Be Reused)
-
-// Set_Key_GB: wg,wb,cg,sg,cb,sb ; Set The Coefficients Used For Green/Blue Keying, KEY G/B = CLAMP(0.0, -ABS((G/B - CENTER)* SCALE) + WIDTH, 1.0) KEY ALPHA = MINIMUM OF KEY R/G/B
-// Word: WIDTH G/B (Size Of Half Key Window Including Soft Edge)*SCALE, CENTER G/B Defines Color Or Intensity At Which Key Is Active (0..255), SCALE GB 1.0/(SIZE OF SOFT EDGE) (0..255)
-
-// Set_Key_R: wr,cr,sr ; Set The Coefficients Used For Red Keying, KEY R = CLAMP(0.0, -ABS((R - CENTER)* SCALE) + WIDTH, 1.0) KEY ALPHA = MINIMUM OF KEY R/G/B
-// Word: WIDTH R (Size Of Half Key Window Including Soft Edge)*SCALE, CENTER R Defines Color Or Intensity At Which Key Is Active (0..255), SCALE R 1.0/(SIZE OF SOFT EDGE) (0..255)
-
-// Set_Convert: k0,k1,k2,k3,k4,k5 ; Updates The Coefficients For Converting YUV Pixels To RGB, R = C0*(Y-16)+C1*V, G = C0*(Y-16)+C2*U-C3*V, B = C0*(Y-16)+C4*U
-// Word: K0, K1, K2, K3, K4, K5 Term Of YUV-RGB Conversion Matrix
-
-// Set_Scissor: xh,yh,xl,yl,lo ; Set The Scissoring Of Primitives
-// Word: Top Left X/Y, Bottom Right X/Y (Fixed Point 10.2), Scissor Field Enable & Scissor Field Even/Odd
 constant SCISSOR_EVEN(0)  // Set_Scissor O: Field Even (Bit 24)
 constant SCISSOR_ODD(1)   // Set_Scissor O: Field Odd (Bit 24)
 constant SCISSOR_FIELD(1) // Set_Scissor F: Scissor Field Enable (Bit 25)
 
-// Set_Prim_Depth: pz,pdz ; Set The Depth Of Primitives
-// Word: Primitive Z Depth, Primitive Delta Z Depth
-
-// Set_Other_Modes: Settings ; Set The Other Modes
-// Set_Other_Modes LO Word
 constant ALPHA_COMPARE_EN($00000000000001) // Set_Other_Modes A: Conditional Color Write On Alpha Compare (Bit 0)
 constant DITHER_ALPHA_EN($00000000000002)  // Set_Other_Modes B: Use Random Noise In Alpha Compare, Otherwise Use Blend Alpha In Alpha Compare (Bit 1)
 constant Z_SOURCE_SEL($00000000000004) // Set_Other_Modes C: Choose Between Primitive Z And Pixel Z (Bit 2)
@@ -380,21 +194,6 @@ constant CYCLE_TYPE_FILL($30000000000000)    // Set_Other_Modes i: Display Pipel
 //*RESERVED*($40000000000000) // Set_Other_Modes j: This Mode Bit Is Not Currently Used, But May Be In The Future (Bit 54)
 constant ATOMIC_PRIM($80000000000000) // Set_Other_Modes k: Force Primitive To Be Written To Frame Buffer Before Read Of Following Primitive
 
-// Load_Tlut: sl,tl,tile,sh,th ; Used To Initiate A Load From DRAM Of An Indexed Texture Lookup Table (TLUT) (This Table Dereferences Color Indexed Texels Before Texture Filtering)
-// Word: Low S Index Into Table (0..255), Low T Normally Zero, Tile ID, High S Index Into Table, High T Normally Zero (Fixed Point 10.2, Fractional Bits Should Be Zero)
-
-// Set_Tile_Size: sl,tl,tile,sh,th ; Set The Tile Size
-// Word: Low S/T Coordinate Of Tile In Image, Tile ID, High S/T Coordinate Of Tile In Image (Fixed Point 10.2)
-
-// Load_Block: sl,tl,tile,sh,dxt ; Loads A TMEM Tile With A Single Memory "Span" From SL,TL To SH,TL (During Tile Load, T Coordinate Is Incremented By DxT Every 8 TMEM Bytes)
-// Word: Low S/T Coordinate Of Tile In Image, Tile ID, High S Coordinate Of Tile In Image (Fixed Point 10.2), Unsigned Increment Value
-
-// Load_Tile: sl,tl,tile,sh,th ; Loads A TMEM Tile
-// Word: Low S/T Coordinate Of Tile In Image, Tile ID, High S/T Coordinate Of Tile In Image (Fixed Point 10.2)
-
-// Set_Tile: hi,lo ; Set The Tile
-// Word: Set Tile Settings
-// Set_Tile LO Word
 constant SHIFT_S_0($0) // Set_Tile: Shift 0 Level Of Detail Shift For S Addresses (Bit 0..3)
 constant SHIFT_S_1($1) // Set_Tile: Shift 1 Level Of Detail Shift For S Addresses (Bit 0..3)
 constant SHIFT_S_2($2) // Set_Tile: Shift 2 Level Of Detail Shift For S Addresses (Bit 0..3)
@@ -489,33 +288,3 @@ constant IMAGE_DATA_FORMAT_YUV(1)        // Set_Tile/Set_Texture_Image/Set_Color
 constant IMAGE_DATA_FORMAT_COLOR_INDX(2) // Set_Tile/Set_Texture_Image/Set_Color_Image: Image Data Format COLOR_INDX (Bit 53..55)
 constant IMAGE_DATA_FORMAT_IA(3)         // Set_Tile/Set_Texture_Image/Set_Color_Image: Image Data Format IA (Bit 53..55)
 constant IMAGE_DATA_FORMAT_I(4)          // Set_Tile/Set_Texture_Image/Set_Color_Image: Image Data Format I (Bit 53..55)
-
-// Fill_Rectangle: xl,yl,xh,yh
-// Word: Bottom Right X/Y, Top Left X/Y (Fixed Point 10.2)
-
-// Set_Fill_Color: Set The Filling Color
-// Word: Packed Color: If The Color Image Was Set BE 16B RGBA, Then The Fill Color Would Be Two Horizontally Adjacent 16B RGBA Pixels
-
-// Set_Fog_Color: Set The Fog Color
-// Word: RGBA Color Components
-
-// Set_Blend_Color: Set The Blending Color
-// Word: RGBA Color Components
-
-// Set_Prim_Color: minlev,levfrac,lo ; Set The Primitive Color
-// Word: Prim Min Level: Minimum Clamp For LOD Fraction When In Detail Or Sharpen Texture Modes (Fixed Point 0.5), Prim Level Frac: Level Of Detail Fraction For Primitive, Used Primarily In Multi-Tile Operations For Rectangle Primitives (Fixed Point 0.8), RGBA Color Components
-
-// Set_Env_Color: Set The Environment Color
-// Word: RGBA Color Components
-
-// Set_Combine_Mode: sub_aR0, mulR0, sub_aA0, mulA0, sub_aR1, mulR1, sub_bR0, sub_bR1, sub_aA1, mulA1, addR0, sub_bA0, addA0, addR1, sub_bA1, addA1 ; Set The Combine Mode
-// Word: SUB_A, Multiply Input RGB Components CYCLE 0, SUB_A, Multiply Input ALPHA Components CYCLE 0, SUB_A, Multiply Input RGB Components CYCLE 1, SUB_B, Multiply Input RGB Components CYCLE 0, SUB_B, Multiply Input RGB Components CYCLE 1, SUB_A, Multiply Input ALPHA Components CYCLE 1, Adder Input RGB Components CYCLE 0, SUB_B Input ALPHA Components CYCLE 0, Adder Input ALPHA Components CYCLE 0, Adder Input RGB Components CYCLE 1, SUB_B Input ALPHA Components CYCLE 1, Adder Input ALPHA Components CYCLE 1
-
-// Set_Texture_Image: Set The Texture Image
-// Word: Image Data Format, Size Of Pixel/Texel Color Element, Width Of Image In Pixels - 1, Base Address (Top Left Corner) Of Image In DRAM
-
-// Set_Z_Image: Set The Z Buffer Image
-// Word: Base Address (Top Left Corner) Of Image In DRAM, In Bytes
-
-// Set_Color_Image: Set The Color Image
-// Word: Image Data Format, Size Of Pixel/Texel Color Element, Width Of Image In Pixels: Image Width=Width+1, Base Address (Top Left Corner) Of Image In DRAM
