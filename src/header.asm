@@ -1,19 +1,14 @@
-// ROM format
-db $80
-db $37
-db $12
-db $40
+// Headers
+db $80, $37, $12, $40
 
-// Init clock rate
-dw $0000000f
+// CPU clock rate
+dw $0000000F
 
-// Code address
-dw Main_Init
-
-// Release address
+// Vectors
+dw Main
 dw $1444
 
-// Integrity control
+// Checksums
 db "CRC1"
 db "CRC2"
 
@@ -21,12 +16,20 @@ db "CRC2"
 dd 0
 
 // Game title
-db "Cube World                 "
-//  ---------------------------
+db "Cube world          "
+//  --------------------
 
-// Other header data
-db $00 // Dev id
-db $00 // Cart id
-db $00
-db $00
-db $00
+// Filler
+dw 0
+
+// Dev id
+db "is06"
+
+// Cart id
+db "CW"
+
+// Country code
+db "E"
+
+// Filler
+db $0
