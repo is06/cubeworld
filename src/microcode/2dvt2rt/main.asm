@@ -1,31 +1,24 @@
-//--------------------------------------------------
+// -----------------------------------------------------
 // RSP microcode
 // 2d-vertex triangle to rasterized triangle
-//--------------------------------------------------
+// -----------------------------------------------------
 
 System_ByteAlign(8)
 Microcode_RSP_2DVT2RT:
 arch n64.rsp
 base $0000
 
-//--------------------------------------------------
+// -----------------------------------------------------
 Microcode_RSP_2DVT2RT_Start:
 
-    include "2dvt2rt/sort_y_coords.asm"
-    include "2dvt2rt/fill_triangle.asm"
+    include "sort_y_coords.asm"
+    include "fill_triangle.asm"
 
-// -----------------------------------------------------
-    nop
-    nop
-    nop
-
-// Run RDP command from RSP with edited RDP buffer data
-// -----------------------------------------------------
     RSP_RunRDPCommand(Microcode_RSP_2DVT2RT_RDPBuffer, Microcode_RSP_2DVT2RT_RDPBuffer_End)
 
     break
 
-//--------------------------------------------------
+// -----------------------------------------------------
 System_ByteAlign(8)
 base Microcode_RSP_2DVT2RT+pc()
 Microcode_RSP_2DVT2RT_End:
@@ -36,15 +29,9 @@ base $0000
 
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords:
     // 2D triangle coords
-    dh 100, 0, 2, 0    // v0: x, xfrac, y, yfrac
-    dh 50, 0, 3, 0    // v1: x, xfrac, y, yfrac
-    dh 150, 0, 1, 0   // v2: x, xfrac, y, yfrac
-
-Microcode_RSP_2DVT2RT_Data_SortedYCoords:
-    // Sorted Y coords
-    dh 150
-    dh 100
-    dh 50
+    dh 100, 0, 50, 0    // v0: x, xfrac, y, yfrac
+    dh 50, 0, 150, 0    // v1: x, xfrac, y, yfrac
+    dh 150, 0, 100, 0   // v2: x, xfrac, y, yfrac
 
 Microcode_RSP_2DVT2RT_Data_L:
     dh 150
@@ -64,7 +51,7 @@ Microcode_RSP_2DVT2RT_Data_M:
     dh 1
     dh 0
 
-//--------------------------------------------------
+// -----------------------------------------------------
 
 System_ByteAlign(8)
 Microcode_RSP_2DVT2RT_RDPBuffer:
@@ -80,7 +67,7 @@ Microcode_RSP_2DVT2RT_RDPBuffer_Triangle:
 
     Sync_Full
 
-//--------------------------------------------------
+// -----------------------------------------------------
 Microcode_RSP_2DVT2RT_RDPBuffer_End:
 
 System_ByteAlign(8)
