@@ -11,12 +11,7 @@ base $0000
 //--------------------------------------------------
 Microcode_RSP_2DVT2RT_Start:
 
-    ldv v0[e0],0(0)
-    ldv v1[e0],8(0)
-    ldv v2[e0],16(0)
-
-// Make fill triangle command
-// -----------------------------------------------------
+    include "2dvt2rt/sort_y_coords.asm"
     include "2dvt2rt/fill_triangle.asm"
 
 // -----------------------------------------------------
@@ -39,10 +34,35 @@ System_ByteAlign(8)
 Microcode_RSP_2DVT2RT_Data:
 base $0000
 
-// 2D triangle coords
-dh 188, 0, 208, 0   // v0: x, xfrac, y, yfrac
-dh 236, 0, 45, 0    // v1: x, xfrac, y, yfrac
-dh 42, 0, 112, 0    // v2: x, xfrac, y, yfrac
+Microcode_RSP_2DVT2RT_Data_2DTriangleCoords:
+    // 2D triangle coords
+    dh 100, 0, 2, 0    // v0: x, xfrac, y, yfrac
+    dh 50, 0, 3, 0    // v1: x, xfrac, y, yfrac
+    dh 150, 0, 1, 0   // v2: x, xfrac, y, yfrac
+
+Microcode_RSP_2DVT2RT_Data_SortedYCoords:
+    // Sorted Y coords
+    dh 150
+    dh 100
+    dh 50
+
+Microcode_RSP_2DVT2RT_Data_L:
+    dh 150
+    dh 0
+    dh -3
+    dh 0
+
+Microcode_RSP_2DVT2RT_Data_H:
+    dh 100
+    dh 0
+    dh -1
+    dh $8888
+
+Microcode_RSP_2DVT2RT_Data_M:
+    dh 100
+    dh 0
+    dh 1
+    dh 0
 
 //--------------------------------------------------
 

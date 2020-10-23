@@ -1,6 +1,6 @@
 arch n64.cpu
 endian msb
-output "../build/helloworld.n64", create
+output "../build/cubeworld.n64", create
 fill 1052672
 origin $00000000
 base $80000000

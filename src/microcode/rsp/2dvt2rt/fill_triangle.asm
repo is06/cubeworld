@@ -4,176 +4,83 @@
 // -----------------------------------------------------
 
     // FillTriangle base address
-    // -----------------------------------------------------
     ori a0,r0,Microcode_RSP_2DVT2RT_RDPBuffer_Triangle
 
-// WORD0.1
-// -----------------------------------------------------
-
-    // Opcode 0x08
-    // -----------------------------------------------------
+    // Opcode 0x08 -> Fill_Triangle
     lui t0,$0800
-
-    // YL
-    // -----------------------------------------------------
-    li t1,150       // todo: get value from vector register
-    sll t1,t1,2
-    or t0,t0,t1
-
-    // tile
-    // -----------------------------------------------------
-    li t1,0         // todo: get value from vector register
-    sll t1,t1,16
-    or t0,t0,t1
-
-    // level
-    // -----------------------------------------------------
-    li t1,0         // todo: get value from vector register
-    sll t1,t1,19
-    or t0,t0,t1
+    addi t1,r0,0
 
     // lft
-    // -----------------------------------------------------
-    li t1,1         // todo: compute value to know if its left or right
-    sll t1,t1,23
-    or t0,t0,t1
+    include "fill_triangle/compute_lft.asm"
 
-    // Store word0.1
-    // -----------------------------------------------------
+    // level (disabled for now, we draw filled triangle)
+    //li t2,0
+    //sll t2,t2,19
+    //or t0,t0,t2
+
+    // tile (disabled for now, we draw filled triangle)
+    //li t2,0
+    //sll t2,t2,16
+    //or t0,t0,t2
+
+    include "fill_triangle/compute_y_coords.asm"
+
+    // Store Word 0
     sw t0,0(a0)
+    sw t1,4(a0)
+    
+    include "fill_triangle/compute_edge.asm"
 
-// WORD0.2
-// -----------------------------------------------------
-    lui t0,0
-
-    // YH
-    // -----------------------------------------------------
-    li t1,50         // todo: get value from vector register
-    sll t1,t1,2
-    or t0,t0,t1
-
-    // YM
-    // -----------------------------------------------------
-    li t1,100        // todo: get value from vector register
-    sll t1,t1,18
-    or t0,t0,t1
-
-    // Store word0.2
-    // -----------------------------------------------------
-    sw t0,4(a0)
-
-// WORD1.1
-// -----------------------------------------------------
-    lui t0,0
-
-    // XLfrac
-    // -----------------------------------------------------
-    li t1,0         // todo: get value from vector register
-    or t0,t0,t1
-
-    // XL
-    // -----------------------------------------------------
-    li t1,150         // todo: get value from vector register
-    sll t1,t1,16
-    or t0,t0,t1
-
-    // Store word1.1
-    // -----------------------------------------------------
+    // Word 1
+    ori a1,r0,Microcode_RSP_2DVT2RT_Data_L
+    jal Microcode_RSP_2DVT2RT_ComputeEdge
+    nop
     sw t0,8(a0)
+    sw t1,12(a0)
 
-// WORD1.2
-// -----------------------------------------------------
-    lui t0,0
-
-    // DxLDyfrac
-    // -----------------------------------------------------
-    li t1,0         // todo: get value from vector register
-    or t0,t0,t1
-
-    // DxLDy
-    // -----------------------------------------------------
-    li t1,-3        // todo: get value from vector register
-    sll t1,t1,16
-    or t0,t0,t1
-
-    // Store word1.2
-    // -----------------------------------------------------
-    sw t0,12(a0)
-
-// WORD2.1
-// -----------------------------------------------------
-    lui t0,0
-
-    // XHfrac
-    // -----------------------------------------------------
-    li t1,0        // todo: get value from vector register
-    or t0,t0,t1
-
-    // XH
-    // -----------------------------------------------------
-    li t1,100        // todo: get value from vector register
-    sll t1,t1,16
-    or t0,t0,t1
-
-    // Store word2.1
-    // -----------------------------------------------------
+    // Word 2
+    ori a1,r0,Microcode_RSP_2DVT2RT_Data_H
+    jal Microcode_RSP_2DVT2RT_ComputeEdge
+    nop
     sw t0,16(a0)
+    sw t1,20(a0)
 
-// WORD2.2
-// -----------------------------------------------------
-    lui t0,0
-
-    // DxHDyfrac
-    // -----------------------------------------------------
-    li t1,$8888        // todo: get value from vector register
-    or t0,t0,t1
-
-    // DxHDy
-    // -----------------------------------------------------
-    li t1,-1        // todo: get value from vector register
-    sll t1,t1,16
-    or t0,t0,t1
-
-    // Store word2.2
-    // -----------------------------------------------------
-    sw t0,20(a0)
-
-// WORD3.1
-// -----------------------------------------------------
-    lui t0,0
-
-    // XMfrac
-    // -----------------------------------------------------
-    li t1,0        // todo: get value from vector register
-    or t0,t0,t1
-
-    // XM
-    // -----------------------------------------------------
-    li t1,100        // todo: get value from vector register
-    sll t1,t1,16
-    or t0,t0,t1
-
-    // Store word3.1 - address offset 24
-    // -----------------------------------------------------
+    // Word 3
+    ori a1,r0,Microcode_RSP_2DVT2RT_Data_M
+    jal Microcode_RSP_2DVT2RT_ComputeEdge
+    nop
     sw t0,24(a0)
+    sw t1,28(a0)
 
-// -----------------------------------------------------
-// Word3.2
-// -----------------------------------------------------
+    // End the fill triangle routine
+    j Microcode_RSP_2DVT2RT_FillTriangleEnd
+    nop
 
-    lui t0,0
+Microcode_RSP_2DVT2RT_ComputeEdge:
+    // Register to zero
+    addi t0,r0,0
+    addi t1,r0,0
 
-    // DxHDyfrac
-    // -----------------------------------------------------
-    li t1,0        // todo: get value from vector register
-    or t0,t0,t1
+    // X
+    lh t2,0(a1)
+    sll t2,t2,16
+    or t0,t0,t2
 
-    // DxHDy
-    // -----------------------------------------------------
-    li t1,1        // todo: get value from vector register
-    sll t1,t1,16
-    or t0,t0,t1
+    // Xfrac
+    lh t2,2(a1)
+    or t0,t0,t2
 
-    // Store word3.2 - address offset 28
-    // -----------------------------------------------------
-    sw t0,28(a0)
+    // DxDy
+    lh t2,4(a1)
+    sll t2,t2,16
+    or t1,t1,t2
+
+    // DxDyfrac
+    lh t2,6(a1)
+    or t1,t1,t2
+
+    // Return
+    jr ra
+    nop
+
+Microcode_RSP_2DVT2RT_FillTriangleEnd:
