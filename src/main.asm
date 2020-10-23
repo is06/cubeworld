@@ -5,12 +5,12 @@ fill 1052672
 origin $00000000
 base $80000000
 
-include "../../n64lib/N64.INC"
-include "../../n64lib/N64_GFX.INC"
-include "../../n64lib/N64_RDP.INC"
-include "../../n64lib/N64_RSP.INC"
+include "../lib/N64.INC"
+include "../lib/N64_GFX.INC"
+include "../lib/N64_RDP.INC"
+include "../lib/N64_RSP.INC"
 include "header.asm"
-insert "../../n64lib/N64_BOOTCODE.BIN"
+insert "../lib/N64_BOOTCODE.BIN"
 
 Main:
     System_Init()

@@ -28,8 +28,6 @@
     // Store Word 0
     sw t0,0(a0)
     sw t1,4(a0)
-    
-    include "fill_triangle/compute_edge.asm"
 
     // Word 1
     ori a1,r0,Microcode_RSP_2DVT2RT_Data_L
