@@ -11,8 +11,21 @@ base $0000
 // -----------------------------------------------------
 Microcode_RSP_2DVT2RT_Start:
 
-    include "sort_y_coords.asm"
-    include "fill_triangle.asm"
+    // Load short integers into vectors
+
+    // X coordinates
+    lsv v0[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords0(0)
+    lsv v1[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords1(0)
+    lsv v2[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords2(0)
+
+    // Y coordinates
+    lsv v3[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords0(0)
+    lsv v4[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords1(0)
+    lsv v5[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords2(0)
+
+    //include "sort_y_coords.asm"
+    include "compute_edges.asm"
+    //include "fill_triangle.asm"
 
     RSP_RunRDPCommand(Microcode_RSP_2DVT2RT_RDPBuffer, Microcode_RSP_2DVT2RT_RDPBuffer_End)
 
@@ -29,27 +42,23 @@ base $0000
 
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords:
     // 2D triangle coords
-    dh 100, 0, 50, 0    // v0: x, xfrac, y, yfrac
-    dh 50, 0, 150, 0    // v1: x, xfrac, y, yfrac
-    dh 150, 0, 100, 0   // v2: x, xfrac, y, yfrac
-
-Microcode_RSP_2DVT2RT_Data_L:
+    // dh 111, 0, 74, 0    // v0: x, xfrac, y, yfrac
+    // dh 20, 0, 125, 0    // v1: x, xfrac, y, yfrac
+    // dh 39, 0, 206, 0   // v2: x, xfrac, y, yfrac
+    
+Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords0:
+    dh 100
+Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords1:
+    dh 50
+Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords2:
     dh 150
-    dh 0
-    dh -3
-    dh 0
 
-Microcode_RSP_2DVT2RT_Data_H:
+Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords0:
+    dh 50
+Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords1:
+    dh 150
+Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords2:
     dh 100
-    dh 0
-    dh -1
-    dh $8888
-
-Microcode_RSP_2DVT2RT_Data_M:
-    dh 100
-    dh 0
-    dh 1
-    dh 0
 
 // -----------------------------------------------------
 
