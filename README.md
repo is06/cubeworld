@@ -10,13 +10,16 @@ Tools
 -----
 
 - [Bass](https://github.com/ARM9/bass): assembler program
+- [libdragon](https://github.com/DragonMinded/libdragon): contains chksum64 tool required for CRC computation
 - [MAME](https://github.com/mamedev/mame): cycle-accurate emulator
+- [cen64](https://github.com/n64dev/cen64): another wonderful cycle-accurate emulator but no debugger included yet
 
 Assemble the game
 -----------------
 
 ```bash
 bass src/main -strict -benchmark
+chksum64 build/cubeworld.n64
 ```
 
 Run the game
