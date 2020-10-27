@@ -3,44 +3,36 @@
 // Command has 4 words
 // -----------------------------------------------------
 
-    // FillTriangle base address
-    ori a0,r0,Microcode_RSP_2DVT2RT_RDPBuffer_Triangle
+    // Multiply Y coords by 4
+    addi t1,r0,4
+    mtc2 t1,v13[e0]
+    vmudn v3,v13[e0] // YH <<= 2
+    vmudn v4,v13[e0] // YM <<= 2
+    vmudn v5,v13[e0] // YL <<= 2
 
-    // Opcode 0x08 -> Fill_Triangle
-    lui t0,$0800
-    addi t1,r0,0
+    // Base address for RDP Buffer Fill_Triangle instruction
+    la a0,Microcode_RSP_2DVT2RT_RDPBuffer_Triangle
 
-    // lft
-    include "fill_triangle/compute_lft.asm"
+    // Store Direction Left/Right Major
+    li t0,$00
+    sb t0,1(a0)
 
-    // level (disabled for now, we draw filled triangle)
-    //li t2,0
-    //sll t2,t2,19
-    //or t0,t0,t2
+    // Store Y coords
+    ssv v5[e0],2(a0)
+    ssv v4[e0],4(a0)
+    ssv v3[e0],6(a0)
 
-    // tile (disabled for now, we draw filled triangle)
-    //li t2,0
-    //sll t2,t2,16
-    //or t0,t0,t2
+    // Store L edge
+    ssv v1[e0],8(a0)    // XL Integer
+    ssv v6[e0],12(a0)   // DxLDy Integer
+    ssv v7[e0],14(a0)   // DxLDy Fraction
 
-    include "fill_triangle/compute_y_coords.asm"
+    // Store H edge
+    ssv v0[e0],16(a0)   // XH Integer
+    ssv v10[e0],20(a0)  // DxHDy Integer
+    ssv v11[e0],22(a0)  // DxHDy Fraction
 
-    // Store Word 0
-    //sw t0,0(a0)
-    //sw t1,4(a0)
-
-    // Store Word 1
-    //sw t0,8(a0)
-    //sw t1,12(a0)
-
-    // Word 2
-    // IF ((Y2 - Y0) == 0) DxHDy = 0.0 
-    // ELSE DxHDy = (X2 - X0) / (Y2 - Y0)
-    //sw t0,16(a0)
-    //sw t1,20(a0)
-
-    // Word 3
-    // IF ((Y2 - Y1) == 0) DxMDy = 0.0 
-    // ELSE DxMDy = (X2 - X1) / (Y2 - Y1)
-    //sw t0,24(a0)
-    //sw t1,28(a0)
+    // Store M edge
+    ssv v0[e0],24(a0)   // XM Integer
+    ssv v8[e0],28(a0)   // DxMDy Integer
+    ssv v9[e0],30(a0)   // DxMDy Fraction

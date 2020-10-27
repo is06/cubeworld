@@ -11,21 +11,13 @@ base $0000
 // -----------------------------------------------------
 Microcode_RSP_2DVT2RT_Start:
 
-    // Load short integers into vectors
+    // Zero vector
+    vsub v31,v31[e0]
 
-    // X coordinates
-    lsv v0[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords0(0)
-    lsv v1[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords1(0)
-    lsv v2[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords2(0)
-
-    // Y coordinates
-    lsv v3[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords0(0)
-    lsv v4[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords1(0)
-    lsv v5[e0],Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords2(0)
-
-    //include "sort_y_coords.asm"
+    include "load_vectors.asm"
+    include "sort_coords.asm"
     include "compute_edges.asm"
-    //include "fill_triangle.asm"
+    include "fill_triangle.asm"
 
     RSP_RunRDPCommand(Microcode_RSP_2DVT2RT_RDPBuffer, Microcode_RSP_2DVT2RT_RDPBuffer_End)
 
