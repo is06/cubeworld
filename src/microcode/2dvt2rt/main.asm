@@ -47,18 +47,18 @@ Microcode_RSP_2DVT2RT_Data_2DTriangleCoords:
     // dh 39, 0, 206, 0   // v2: x, xfrac, y, yfrac
     
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords0:
-    dh 100
+    dh 111
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords1:
-    dh 50
+    dh 20
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords2:
-    dh 150
+    dh 39
 
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords0:
-    dh 50
+    dh 74
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords1:
-    dh 150
+    dh 125
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords2:
-    dh 100
+    dh 206
 
 // -----------------------------------------------------
 

@@ -127,7 +127,7 @@
 
     la a0,Microcode_RSP_2DVT2RT_RDPBuffer_Triangle
 
-    li t0,$80
+    li t0,$00
     sb t0,1(a0)         // Store Triangle 1: Direction Left/Right Major
 
     ssv v5[e0],2(a0) // Store Triangle 1: YL Integer
