@@ -14,6 +14,13 @@ insert "../lib/N64_BOOTCODE.BIN"
 
 Main:
     System_Init()
+    Video_SetNTSC(320, 240, BPP16, $A0100000)
+
+Main_RSP_Init:
+    RSP_Load(Microcode_RSP_Init, Microcode_RSP_Init_End, SP_IMEM)
+    RSP_DMAWait()
+    RSP_SetProgramCounter(Microcode_RSP_Init_Start)
+    RSP_Start()
 
 include "game.asm"
 include "microcodes.asm"

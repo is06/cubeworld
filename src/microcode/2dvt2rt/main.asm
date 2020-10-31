@@ -11,9 +11,6 @@ base $0000
 // -----------------------------------------------------
 Microcode_RSP_2DVT2RT_Start:
 
-    // Zero vector
-    vsub v31,v31[e0]
-
     include "load_vectors.asm"
     include "sort_coords.asm"
     include "compute_edges.asm"
