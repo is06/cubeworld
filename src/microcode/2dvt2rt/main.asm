@@ -13,6 +13,7 @@ Microcode_RSP_2DVT2RT_Start:
 
     include "load_vectors.asm"
     include "sort_coords.asm"
+    include "poly_winding.asm"
     include "compute_edges.asm"
     include "fill_triangle.asm"
 
@@ -30,20 +31,16 @@ Microcode_RSP_2DVT2RT_Data:
 base $0000
 
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords:
-    // 2D triangle coords
-    // dh 111, 0, 74, 0    // v0: x, xfrac, y, yfrac
-    // dh 20, 0, 125, 0    // v1: x, xfrac, y, yfrac
-    // dh 39, 0, 206, 0   // v2: x, xfrac, y, yfrac
     
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords0:
-    dh 111
+    dh 300
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords1:
-    dh 20
+    dh 120
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_XCoords2:
     dh 39
 
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords0:
-    dh 74
+    dh 274
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords1:
     dh 125
 Microcode_RSP_2DVT2RT_Data_2DTriangleCoords_YCoords2:

@@ -10,7 +10,7 @@ Game_RSP_Triangle_Test:
     RSP_Start()
 
 Game_Update:
-    // Wait for vsync synchronization (60 Hz -> 60 fps)
+    // Wait for vertical synchronization (60 Hz -> 60 fps)
     Video_WaitForScanline($200)
 
     j Game_Update

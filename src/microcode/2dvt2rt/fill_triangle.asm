@@ -3,19 +3,21 @@
 // Command has 4 words
 // -----------------------------------------------------
 
-    // Multiply Y coords by 4
-    addi t1,r0,4
-    mtc2 t1,v13[e0]
-    vmudn v3,v13[e0] // YH <<= 2
-    vmudn v4,v13[e0] // YM <<= 2
-    vmudn v5,v13[e0] // YL <<= 2
-
     // Base address for RDP Buffer Fill_Triangle instruction
     la a0,Microcode_RSP_2DVT2RT_RDPBuffer_Triangle
 
-    // Store Direction Left/Right Major
-    li t0,$00
-    sb t0,1(a0)
+    // Store Command & Direction Left/Right Major
+    lui t0,$0800
+    sll t1,23
+    or t0,t0,t1
+    sw t0,0(a0)
+
+    // Multiply Y coords by 4
+    addi t0,r0,4
+    mtc2 t0,v13[e0]
+    vmudn v3,v13[e0] // YH <<= 2
+    vmudn v4,v13[e0] // YM <<= 2
+    vmudn v5,v13[e0] // YL <<= 2
 
     // Store Y coords
     ssv v5[e0],2(a0)
