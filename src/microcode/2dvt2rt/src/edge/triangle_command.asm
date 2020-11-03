@@ -1,23 +1,23 @@
 // -----------------------------------------------------
-// FillTriangle edition in RDPBuffer
+// Triangle command edition in RDPBuffer
 // Command has 4 words
 // -----------------------------------------------------
 
-    // Base address for RDP Buffer Fill_Triangle instruction
+    // Base address for RDP Buffer Triangle instruction
     la a0,Microcode_RSP_2DVT2RT_RDPBuffer_Triangle
 
     // Store Command & Direction Left/Right Major
-    lui t0,$0800
+    lui t0,$0C00
     sll t1,23
     or t0,t0,t1
     sw t0,0(a0)
 
     // Multiply Y coords by 4
     addi t0,r0,4
-    mtc2 t0,v13[e0]
-    vmudn v3,v13[e0] // YH <<= 2
-    vmudn v4,v13[e0] // YM <<= 2
-    vmudn v5,v13[e0] // YL <<= 2
+    mtc2 t0,v12[e0]
+    vmudn v3,v12[e0] // YH <<= 2
+    vmudn v4,v12[e0] // YM <<= 2
+    vmudn v5,v12[e0] // YL <<= 2
 
     // Store Y coords
     ssv v5[e0],2(a0)
