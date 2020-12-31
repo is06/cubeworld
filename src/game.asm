@@ -37,13 +37,19 @@ Game_Routine_Move_Coord:
     beq t0,t1,Game_Routine_Reinit_Coord
     nop
 
+    // return
     jr ra
     nop
 
 Game_Routine_Reinit_Coord:
+    // xcoord = 0
     lui a0,GAME_DATA_BASE_ADDR
     ori t0,r0,r0
+
+    // store into ram
     sh t0,Game_Data_Triangle_Coords_X0(a0)
+
+    // return
     j Game_Routine_Move_Coord
     nop
 
@@ -53,12 +59,16 @@ Game_Routine_Microcode_Load:
     RSP_DMAWait()
     RSP_Load(Microcode_RSP_2DVT2RT_Data, Microcode_RSP_2DVT2RT_Data_End, SP_DMEM)
     RSP_DMAWait()
+
+    // return
     jr ra
     nop
 
 Game_Routine_Draw_Scene:
     RSP_SetProgramCounter(Microcode_RSP_2DVT2RT_Start)
     RSP_Start()
+
+    // return
     jr ra
     nop
 
