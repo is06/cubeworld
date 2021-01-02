@@ -4,4 +4,5 @@
 Contents
 --------
 
+- [How it works](howitworks.md)
 - [DMEM](dmem.md)

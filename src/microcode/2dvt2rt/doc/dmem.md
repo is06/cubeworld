@@ -1,6 +1,9 @@
 DMEM mapping
 ============
 
+- Coordinates in pixel on screen are signed 16-bit long (from -32768 to 32767)
+- Vertice colors are packed 32-bit colors
+
 | Data           | Size | Address | Loaded vector |
 | -------------- | ---- | ------- | ------------- |
 | x0             | 16   | 0x0000  | v0[e0]        |
